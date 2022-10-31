@@ -28,10 +28,9 @@
     "SwaggerPath": ""
   },
   "JWToken": {
-    "SecretKey": "broker-dev-v1",
+    "SecretKey": "",
     "AccessTokenTTL": 3600,
-    "RefreshTokenTTL": 86400,
-    "SecureTokenTTL": 1800
+    "RefreshTokenTTL": 3600
   },
   "Encrypt": {
     "AES": {
@@ -42,27 +41,12 @@
   "MySql": [
     {
       "Name": "broker-dev",
-      "DSN": "broker-admin:v6z&u4Z73J!4@tcp(18.141.8.110)/broker_dev?charset=utf8mb4&parseTime=true",
+      "DSN": "broker-admin:v6z&u4Z73J!4@tcp(18.141.8.110)/broker-dev?charset=utf8mb4&parseTime=true",
       "MaxOpenConnections": 10,
       "MaxIdleConnections": 10,
       "Active": 50,
       "Idle": 50,
       "Lifetime": 60
-    }
-  ],
-  "Redis": [
-    {
-      "Name": "broker_cache",
-      "Hosts": [],
-      "Host": "18.141.8.110:6379",
-      "Idle": 100,
-      "Active": 100,
-      "DialTimeout": 5,
-      "ReadTimeout": 5,
-      "WriteTimeout": 5,
-      "IdleTimeout": 10,
-      "DBNum": 0,
-      "MaxRetries": 3
     }
   ]
 }

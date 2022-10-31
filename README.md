@@ -1,2 +1,0 @@
-# lib-kephas
-lib go 
