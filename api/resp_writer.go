@@ -1,4 +1,4 @@
-package app
+package api
 
 import (
 	"github.com/Kephas73/lib-kephas/error_code"

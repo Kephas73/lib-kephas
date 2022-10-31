@@ -14,7 +14,7 @@ type ErrorCode struct {
 	WaitFor      int    `json:"wait_for,omitempty"`
 }
 
-func NewError(code int32, message string) (err *ErrorCode) {
+func NewError(code int32, message string, line string) (err *ErrorCode) {
 	httpCode := int32(code) / 1000
 	if httpCode >= 1000 {
 		httpCode = httpCode / 10
@@ -32,7 +32,7 @@ func NewError(code int32, message string) (err *ErrorCode) {
 				ErrorCode:    code,
 				ErrorMessage: fmt.Sprintf("%s: code = %d, message = %s", name, code, message),
 				WaitFor:      10,
-				Exception:    fmt.Sprintf("Time: %s, Line: %s", base.TimeCurrent(), base.GetFunc()),
+				Exception:    fmt.Sprintf("Time: %s, Line: %s", base.TimeCurrent(), line),
 			}
 		} else {
 			err = &ErrorCode{
@@ -40,7 +40,7 @@ func NewError(code int32, message string) (err *ErrorCode) {
 				ErrorCode:    code,
 				ErrorMessage: fmt.Sprintf("%s: code = %d, message = %s", name, code, message),
 				WaitFor:      30,
-				Exception:    fmt.Sprintf("Time: %s, Line: %s", base.TimeCurrent(), base.GetFunc()),
+				Exception:    fmt.Sprintf("Time: %s, Line: %s", base.TimeCurrent(), line),
 			}
 		}
 	} else {
@@ -55,7 +55,7 @@ func NewError(code int32, message string) (err *ErrorCode) {
 			ErrorCode:    code,
 			ErrorMessage: fmt.Sprintf("INTERNAL_SERVER_ERROR: code = %d, message = %s", code, message),
 			WaitFor:      60,
-			Exception:    fmt.Sprintf("Time: %s, Line: %s", base.TimeCurrent(), base.GetFunc()),
+			Exception:    fmt.Sprintf("Time: %s, Line: %s", base.TimeCurrent(), line),
 		}
 	}
 
