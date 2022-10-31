@@ -1,0 +1,41 @@
+{
+  "Debug": true,
+  "Logger": {
+    "Path": "../var/log",
+    "Prefix": "broker_dev",
+    "SentryDns": "",
+    "Description": ""
+  },
+  "Server": {
+    "Port": "9092",
+    "Host": "18.141.8.110",
+    "Environment": "develop",
+    "ServiceName": "broker-dev",
+    "RegionDC": "ap-southeast-1",
+    "Timeout": 20,
+    "Description": ""
+  },
+  "Context": {
+    "Timeout": 5
+  },
+  "SettingAPI": {
+    "Path": "broker-dev/api",
+    "PathPrivate": "private/broker-dev/api",
+    "Version": "v1.0"
+  },
+  "HostPrivate": {},
+  "DocsAPI": {
+    "SwaggerPath": ""
+  },
+  "JWToken": {
+    "SecretKey": "",
+    "AccessTokenTTL": 3600,
+    "RefreshTokenTTL": 3600
+  },
+  "Encrypt": {
+    "AES": {
+      "Key": "",
+      "IV": ""
+    }
+  }
+}
