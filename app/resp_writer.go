@@ -19,7 +19,7 @@ type Response struct {
 
 func WriteSuccess(c echo.Context, v interface{}) error {
 	res := Response{
-		Message: "Success",
+		Message: "Success!!",
 		Data:    v,
 		Status:  http.StatusOK,
 	}
