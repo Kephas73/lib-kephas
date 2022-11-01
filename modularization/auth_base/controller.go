@@ -30,14 +30,14 @@ func Initialize(cache *redis_client.RedisPool, timeout time.Duration) {
 }
 
 func (ctrl *AuthBaseCtrl) JWTGateway(next echo.HandlerFunc) echo.HandlerFunc {
-	return BaseGateway(next, false)
+	return ctrl.BaseGateway(next, false)
 }
 
 func (ctrl *AuthBaseCtrl) SecureGateway(next echo.HandlerFunc) echo.HandlerFunc {
-	return BaseGateway(next, true)
+	return ctrl.BaseGateway(next, true)
 }
 
-func BaseGateway(next echo.HandlerFunc, shortLive bool) echo.HandlerFunc {
+func (ctrl *AuthBaseCtrl) BaseGateway(next echo.HandlerFunc, shortLive bool) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		accessUUID, accountUUID, deviceKind, deviceIP, _, errCode := JWToken.ExtractToken(ctx, shortLive)
 		if errCode != nil {
