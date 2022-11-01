@@ -1,9 +1,9 @@
 package JWToken
 
 import (
-	"errors"
 	"fmt"
 	"github.com/Kephas73/lib-kephas/base"
+	"github.com/Kephas73/lib-kephas/error_code"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -101,7 +101,7 @@ func NewToken(accountID string, deviceKind int, deviceIP string, configs ...*JWT
 	return td, err
 }
 
-func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (accessUUID string, accountID string, deviceKind int, deviceIP string, bearToken string, err error) {
+func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (accessUUID string, accountID string, deviceKind int, deviceIP string, bearToken string, errError *error_code.ErrorCode) {
 	if conf == nil {
 		if len(configs) == 0 {
 			getJWTConfigFromEnv()
@@ -110,17 +110,20 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 		}
 	}
 
-	token, b, err := GetToken(c, configs...)
-	bearToken = b
+	token, b, errError := GetToken(c, configs...)
+	if errError != nil {
+		return
+	}
 
+	bearToken = b
 	// Check Token Valid Expire
 	if token == nil {
-		err = errors.New("not found or can not parse token")
+		errError = error_code.NewError(error_code.ERROR_NEED_NEW_TOKEN, "not found or can not parse token", base.GetFunc())
 		return
 	}
 
 	if !token.Valid {
-		err = errors.New("token is invalid")
+		errError = error_code.NewError(error_code.ERROR_TOKEN_INVALID, "token is invalid", base.GetFunc())
 		return
 	}
 
@@ -128,13 +131,13 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 	if ok && token.Valid {
 		accessUUID, ok = claims[KTokenAccessUUIDKey].(string)
 		if !ok {
-			err = errors.New("token Invalid or Expire - not found access uuid key")
+			errError = error_code.NewError(error_code.ERROR_TOKEN_INVALID, "token Invalid or Expire - not found access uuid key", base.GetFunc())
 			return
 		}
 
 		accountID, ok = claims[KTokenUserIDKey].(string)
 		if !ok {
-			err = errors.New("invalid Bearer Token - not found user uuid key")
+			errError = error_code.NewError(error_code.ERROR_TOKEN_INVALID, "invalid Bearer Token - not found user uuid key", base.GetFunc())
 			return
 		}
 
@@ -143,7 +146,7 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 		}
 
 		if deviceKind < 0 {
-			err = errors.New(fmt.Sprintf("no device info: %s", accountID))
+			errError = error_code.NewError(error_code.ERROR_TOKEN_INVALID, fmt.Sprintf("no device info: %s", accountID), base.GetFunc())
 			return
 		}
 
@@ -154,11 +157,11 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 		if shortLive {
 			shortLiveExp, ok := claims[KTokenSecureExpKey].(float64)
 			if !ok {
-				err = errors.New("invalid Bearer Token - can not get secure expiration")
+				errError = error_code.NewError(error_code.ERROR_TOKEN_INVALID, "invalid Bearer Token - can not get secure expiration", base.GetFunc())
 				return
 			} else {
 				if int64(shortLiveExp) < time.Now().Unix() {
-					err = errors.New("invalid Bearer Token - token was expired")
+					errError = error_code.NewError(error_code.ERROR_NEED_NEW_TOKEN, "invalid Bearer Token - token was expired", base.GetFunc())
 				}
 			}
 		}
@@ -169,7 +172,7 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 	return
 }
 
-func ExtractRefreshToken(c echo.Context, configs ...*JWTConfig) (refreshUUID string, accountID string, err error) {
+func ExtractRefreshToken(c echo.Context, configs ...*JWTConfig) (refreshUUID string, accountID string, errError *error_code.ErrorCode) {
 	if conf == nil {
 		if len(configs) == 0 {
 			getJWTConfigFromEnv()
@@ -178,16 +181,19 @@ func ExtractRefreshToken(c echo.Context, configs ...*JWTConfig) (refreshUUID str
 		}
 	}
 
-	token, _, err := GetToken(c, configs...)
+	token, _, errError := GetToken(c, configs...)
+	if errError != nil {
+		return
+	}
 
 	if token == nil {
-		err = errors.New("token Invalid or Expire")
+		errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, "token Invalid or Expire", base.GetFunc())
 		return
 	}
 
 	// Check Token Valid Expire
 	if !token.Valid {
-		err = errors.New("invalid Bearer Token")
+		errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, "invalid Bearer Token", base.GetFunc())
 		return
 	}
 
@@ -195,39 +201,38 @@ func ExtractRefreshToken(c echo.Context, configs ...*JWTConfig) (refreshUUID str
 	if ok && token.Valid {
 		refreshUUID, ok = claims[KTokenRefreshUUIDKey].(string)
 		if !ok {
-			err = errors.New("invalid Bearer Token")
+			errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, "invalid Bearer Token", base.GetFunc())
 			return
 		}
 
 		accountID, ok = claims[KTokenUserIDKey].(string)
 		if !ok {
-			err = errors.New("invalid Bearer Token")
+			errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, "invalid Bearer Token", base.GetFunc())
 			return
 		}
 
 		return
 	}
 
-	err = errors.New("invalid Bearer Token")
+	errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, "invalid Bearer Token", base.GetFunc())
 	return
 }
 
-func GetToken(c echo.Context, configs ...*JWTConfig) (token *jwt.Token, bearToken string, err error) {
+func GetToken(c echo.Context, configs ...*JWTConfig) (token *jwt.Token, bearToken string, errCode *error_code.ErrorCode) {
 	// Get token from Echo
 	cookie := c.Request().Header.Get("Authorization")
 	if len(cookie) < 1 {
-		err = errors.New("invalid Bearer Token - not found Authorization key")
+		errCode = error_code.NewError(error_code.ERROR_AUTHORIZE, "invalid Bearer Token - not found Authorization key", base.GetFunc())
 		return
 	}
 
 	if !strings.Contains(cookie, " ") {
-		errorLog := fmt.Sprintf("AuthToken Have No Space Split: %s", cookie)
-		err = errors.New(errorLog)
+		errCode = error_code.NewError(error_code.ERROR_UNAUTHORIZED_USER, fmt.Sprintf("AuthToken Have No Space Split: %s", cookie), base.GetFunc())
 		return
 	}
 
 	bearToken = strings.Split(cookie, " ")[1]
-	token, err = jwt.Parse(bearToken, func(token *jwt.Token) (interface{}, error) {
+	tokenParse, err := jwt.Parse(bearToken, func(token *jwt.Token) (interface{}, error) {
 		//Make sure that the token method conform to "SigningMethodHMAC"
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -237,5 +242,11 @@ func GetToken(c echo.Context, configs ...*JWTConfig) (token *jwt.Token, bearToke
 		return []byte(signKey), nil
 	})
 
+	if err != nil {
+		errCode = error_code.NewError(error_code.ERROR_TOKEN_INVALID, err.Error(), base.GetFunc())
+		return
+	}
+
+	token = tokenParse
 	return
 }

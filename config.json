@@ -39,6 +39,19 @@
       "IV": ""
     }
   },
+  "Captcha": {
+    "Decode": {
+      "Website": "https://anti-captcha.com/",
+      "Username": "NCTienGH97",
+      "Password": "NCTienGH97",
+      "ClientKey": "a27158980688a6f2e7491326b20603ca",
+      "Url": {
+        "Create": "https://api.anti-captcha.com/createTask",
+        "Get": "https://api.anti-captcha.com/getTaskResult"
+      }
+    },
+    "PathKey": "../captcha.csv"
+  },
   "MySql": [
     {
       "Name": "broker-dev",
