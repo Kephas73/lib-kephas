@@ -48,6 +48,29 @@ func WriteSuccessWithExtend(c echo.Context, data interface{}, extend map[string]
 	return c.JSON(http.StatusOK, res)
 }
 
+func WriterSuccessOther(c echo.Context, success *error_code.SuccessCode) error {
+	res := Response{
+		Message: "Success!!",
+		Data:    success,
+		Status:  int(success.Status),
+	}
+
+	// Return
+	return c.JSON(int(success.Status), res)
+}
+
+func WriterSuccessOtherWithExtend(c echo.Context, success *error_code.SuccessCode, extend map[string]ObjectExtend) error {
+	res := Response{
+		Message:    "Success!!",
+		Data:       success,
+		DataExtend: extend,
+		Status:     int(success.Status),
+	}
+
+	// Return
+	return c.JSON(int(success.Status), res)
+}
+
 func WriteError(c echo.Context, err *error_code.ErrorCode) error {
 	res := Response{
 		Message: "Failure!!",

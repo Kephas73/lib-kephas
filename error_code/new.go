@@ -14,6 +14,13 @@ type ErrorCode struct {
 	WaitFor      int    `json:"wait_for,omitempty"`
 }
 
+type SuccessCode struct {
+	Status         int32  `json:"status,omitempty"`
+	SuccessCode    int32  `json:"success_code,omitempty"`
+	SuccessMessage string `json:"success_message,omitempty"`
+	WaitFor        int    `json:"wait_for,omitempty"`
+}
+
 func NewError(code int32, message string, line string) (err *ErrorCode) {
 	httpCode := int32(code) / 1000
 	if httpCode >= 1000 {
@@ -56,6 +63,42 @@ func NewError(code int32, message string, line string) (err *ErrorCode) {
 			ErrorMessage: fmt.Sprintf("INTERNAL_SERVER_ERROR: code = %d, message = %s", code, message),
 			WaitFor:      60,
 			Exception:    fmt.Sprintf("Time: %s, Line: %s", base.TimeCurrent(), line),
+		}
+	}
+
+	return
+}
+
+func NewSuccess(code int32, message string, waitFor int) (err *SuccessCode) {
+	httpCode := int32(code) / 1000
+	if httpCode >= 1000 {
+		httpCode = httpCode / 10
+	}
+
+	if name, ok := ERROR_CODE_NAME[int32(code)]; ok {
+
+		if message == "" {
+			message = name
+		}
+
+		err = &SuccessCode{
+			Status:         httpCode,
+			SuccessCode:    code,
+			SuccessMessage: fmt.Sprintf("%s: code = %d, message = %s", name, code, message),
+			WaitFor:        waitFor,
+		}
+	} else {
+		code = int32(ERROR_CODE_OK)
+		httpCode = int32(code) / 1000
+		if httpCode >= 1000 {
+			httpCode = httpCode / 10
+		}
+
+		err = &SuccessCode{
+			Status:         httpCode,
+			SuccessCode:    code,
+			SuccessMessage: fmt.Sprintf("INTERNAL_SERVER_ERROR: code = %d, message = %s", code, message),
+			WaitFor:        waitFor,
 		}
 	}
 
