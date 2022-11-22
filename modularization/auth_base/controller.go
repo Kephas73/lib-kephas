@@ -55,3 +55,24 @@ func (ctrl *AuthBaseCtrl) BaseGateway(next echo.HandlerFunc, shortLive bool) ech
 		return next(ctx)
 	}
 }
+
+func (ctrl *AuthBaseCtrl) JWTRefresh(next echo.HandlerFunc) echo.HandlerFunc {
+	return ctrl.Refresh(next, false)
+}
+
+func (ctrl *AuthBaseCtrl) Refresh(next echo.HandlerFunc, shortLive bool) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		accessUUID, accountUUID, errCode := JWToken.ExtractRefreshToken(ctx)
+		if errCode != nil {
+			return api.WriteError(ctx, errCode)
+		}
+
+		// Check token redis
+
+		// Set context
+		api.SetContextDataString(ctx, constant.AccessUUID, accessUUID)
+		api.SetContextDataString(ctx, constant.UserID, accountUUID)
+
+		return next(ctx)
+	}
+}
