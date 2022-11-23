@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+// StringToInt func;
+func StringToInt(s string) (int, error) {
+	i, err := strconv.Atoi(s)
+	return i, err
+}
+
 // StringToInt32 func;
 func StringToInt32(s string) (int32, error) {
 	i, err := strconv.Atoi(s)
