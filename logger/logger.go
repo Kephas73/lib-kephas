@@ -17,15 +17,15 @@ func NewLogger(logPath string, logPrefix string, debug bool) *logrus.Logger {
 	}
 
 	logPathMap := lfshook.PathMap{
-		logrus.InfoLevel:  path.Join(logPath, base.Today(), logPrefix+"_success.log"),
-		logrus.TraceLevel: path.Join(logPath, base.Today(), logPrefix+"_success.log"),
-		logrus.WarnLevel:  path.Join(logPath, base.Today(), logPrefix+"_success.log"),
+		logrus.InfoLevel:  path.Join(logPath, base.YearNow(), base.MonthNow(), base.Today(), logPrefix+"_success.log"),
+		logrus.TraceLevel: path.Join(logPath, base.YearNow(), base.MonthNow(), base.Today(), logPrefix+"_success.log"),
+		logrus.WarnLevel:  path.Join(logPath, base.YearNow(), base.MonthNow(), base.Today(), logPrefix+"_success.log"),
 
-		logrus.DebugLevel: path.Join(logPath, base.Today(), logPrefix+"_debug.log"),
+		logrus.DebugLevel: path.Join(logPath, base.YearNow(), base.MonthNow(), base.Today(), logPrefix+"_debug.log"),
 
-		logrus.ErrorLevel: path.Join(logPath, base.Today(), logPrefix+"_error.log"),
-		logrus.FatalLevel: path.Join(logPath, base.Today(), logPrefix+"_error.log"),
-		logrus.PanicLevel: path.Join(logPath, base.Today(), logPrefix+"_error.log"),
+		logrus.ErrorLevel: path.Join(logPath, base.YearNow(), base.MonthNow(), base.Today(), logPrefix+"_error.log"),
+		logrus.FatalLevel: path.Join(logPath, base.YearNow(), base.MonthNow(), base.Today(), logPrefix+"_error.log"),
+		logrus.PanicLevel: path.Join(logPath, base.YearNow(), base.MonthNow(), base.Today(), logPrefix+"_error.log"),
 	}
 
 	logFormatter := new(logrus.TextFormatter)
