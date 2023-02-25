@@ -1,4 +1,4 @@
-package MQTT
+package mqtt_client
 
 import "github.com/Kephas73/lib-kephas/base"
 
