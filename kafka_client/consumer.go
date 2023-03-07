@@ -1,29 +1,3 @@
-/* !!
- * File: consumer.go
- * File Created: Wednesday, 5th May 2021 10:33:38 am
- * Author: KimEricko™ (phamkim.pr@gmail.com)
- * -----
- * Last Modified: Wednesday, 5th May 2021 10:34:56 am
- * Modified By: KimEricko™ (phamkim.pr@gmail.com>)
- * -----
- * Copyright 2018 - 2021 GTV, GGroup
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Developer: NhokCrazy199 (phamkim.pr@gmail.com)
- */
-
 package kafka_client
 
 import (
@@ -32,8 +6,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-
-	"gitlab.gplay.vn/gtv-backend/fountain/baselib/g_log"
 
 	"github.com/Shopify/sarama"
 )
@@ -48,10 +20,10 @@ type ConsumerProcessInstance interface {
 // Func need run as goroutine;
 // If groupName is not set, groupName will be env ConsumerTopicNames
 func (c *ClientKafka) InstallConsumerGroup(processingInstance ConsumerProcessInstance, consumerGroupName string, topicName ...string) {
-	g_log.V(1).Infof("ClientKafka::InstallConsumerGroup - Register consumer group: %s for topics: %+v", consumerGroupName, topicName)
+	fmt.Printf(fmt.Sprintf("ClientKafka::InstallConsumerGroup - Register consumer group: %s for topics: %v", consumerGroupName, topicName))
 
 	if c == nil || c.config == nil {
-		g_log.V(1).Error("ClientKafka::InstallConsumerGroup - Need InstallKafkaClient first")
+		fmt.Println("ClientKafka::InstallConsumerGroup - Need InstallKafkaClient first")
 
 		// send to telegram
 
@@ -60,7 +32,7 @@ func (c *ClientKafka) InstallConsumerGroup(processingInstance ConsumerProcessIns
 
 	if len(topicName) == 0 {
 		err := fmt.Errorf("need a least 1 topic name")
-		g_log.V(1).WithError(err).Errorf("ClientKafka::InstallConsumerGroup - InstallKafkaClient error: %+v", err)
+		fmt.Printf(fmt.Sprintf("ClientKafka::InstallConsumerGroup - InstallKafkaClient error: %+v", err))
 		panic(err)
 	}
 
@@ -77,7 +49,7 @@ func (c *ClientKafka) InstallConsumerGroup(processingInstance ConsumerProcessIns
 
 	client, err := sarama.NewConsumerGroup(c.config.Addrs, consumerGroupName, c.kafkaClientConfig)
 	if err != nil {
-		g_log.V(1).WithError(err).Errorf("ClientKafka::InstallConsumerGroup - Error creating consumer group client: %+v", err)
+		fmt.Printf(fmt.Sprintf("ClientKafka::InstallConsumerGroup - Error creating consumer group client: %v", err))
 
 		// Send to telegram
 
@@ -128,16 +100,16 @@ func (c *ClientKafka) InstallConsumerGroup(processingInstance ConsumerProcessIns
 	topicsStr := strings.Join(topicName, ", ")
 
 	<-consumer.ready // Await till the consumer has been set up
-	g_log.V(1).Infof("ClientKafka::InstallConsumerGroup - Consumer group: %q for topics: %q up and running!...", consumerGroupName, topicsStr)
+	fmt.Printf(fmt.Sprintf("ClientKafka::InstallConsumerGroup - Consumer group: %q for topics: %q up and running!...", consumerGroupName, topicsStr))
 
 	<-ctx.Done()
-	g_log.V(1).Infof("ClientKafka::InstallConsumerGroup - Consumer group: %q for topics: %q. Terminating: context cancelled", consumerGroupName, topicsStr)
+	fmt.Printf(fmt.Sprintf("ClientKafka::InstallConsumerGroup - Consumer group: %q for topics: %q. Terminating: context cancelled", consumerGroupName, topicsStr))
 
 	cancel()
 
 	wg.Wait()
 	if err = client.Close(); err != nil {
-		g_log.V(1).WithError(err).Errorf("ClientKafka::InstallConsumerGroup - Consumer group: %s for topics: %s. Error closing client: %v", consumerGroupName, topicsStr, err)
+		fmt.Printf(fmt.Sprintf("ClientKafka::InstallConsumerGroup - Consumer group: %s for topics: %s. Error closing client: %v", consumerGroupName, topicsStr, err))
 	}
 }
 

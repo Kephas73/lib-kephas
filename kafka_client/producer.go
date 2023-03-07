@@ -1,38 +1,10 @@
-/* !!
- * File: producer.go
- * File Created: Wednesday, 5th May 2021 10:33:38 am
- * Author: KimEricko™ (phamkim.pr@gmail.com)
- * -----
- * Last Modified: Wednesday, 5th May 2021 10:35:00 am
- * Modified By: KimEricko™ (phamkim.pr@gmail.com>)
- * -----
- * Copyright 2018 - 2021 GTV, GGroup
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Developer: NhokCrazy199 (phamkim.pr@gmail.com)
- */
-
 package kafka_client
 
 import (
 	"fmt"
+	"github.com/Kephas73/lib-kephas/base"
+	"github.com/Kephas73/lib-kephas/env"
 	"time"
-
-	"gitlab.gplay.vn/gtv-backend/fountain/baselib/base"
-	"gitlab.gplay.vn/gtv-backend/fountain/baselib/env"
-	"gitlab.gplay.vn/gtv-backend/fountain/baselib/g_log"
 
 	"github.com/Shopify/sarama"
 )
@@ -68,7 +40,7 @@ func InstallKafkaClient(configKeys ...string) *ClientKafka {
 	conf.Producer.Compression = sarama.CompressionSnappy
 	conf.Producer.Partitioner = sarama.NewRoundRobinPartitioner
 	conf.Producer.Flush.Frequency = 5 * time.Millisecond
-	conf.ClientID = env.PodName
+	conf.ClientID = fmt.Sprintf("%s_%d", env.Environment.Server.ServiceName, base.TimeNowUnix())
 
 	// version, err := sarama.ParseKafkaVersion("2.1.1")
 	// if err != nil {
@@ -83,7 +55,7 @@ func InstallKafkaClient(configKeys ...string) *ClientKafka {
 
 	producer, err := sarama.NewSyncProducer(kafkaConfig.Addrs, conf)
 	if err != nil {
-		g_log.V(1).WithError(err).Errorf("InstallKafkaClient - Error: %+v", err)
+		fmt.Println(fmt.Sprintf("InstallKafkaClient - Error: %+v", err))
 
 		// send log to telegram
 
@@ -123,12 +95,12 @@ func checkExistTopic(slice []string, val string) (int, bool) {
 // CreateTopic func;
 func (c *ClientKafka) CreateTopic() {
 	if c == nil || c.config == nil {
-		g_log.V(1).Error("ClientKafka::CreateTopic - Need InstallKafkaClient first")
+		fmt.Println("ClientKafka::CreateTopic - Need InstallKafkaClient first")
 		return
 	}
 
 	if len(c.config.ProducerTopics) == 0 {
-		g_log.V(1).Error("ClientKafka::CreateTopic - Need least one topic")
+		fmt.Println("ClientKafka::CreateTopic - Need least one topic")
 
 		return
 	}
@@ -142,13 +114,13 @@ func (c *ClientKafka) CreateTopic() {
 
 	consumer, err := sarama.NewConsumer(c.config.Addrs, c.kafkaClientConfig)
 	if err != nil {
-		g_log.V(1).WithError(err).Errorf("ClientKafka::CreateTopic - Error when create new consumer %+v", err)
+		fmt.Printf(fmt.Sprintf("ClientKafka::CreateTopic - Error when create new consumer %+v", err))
 
 		return
 	}
 
 	listTopic, _ := consumer.Topics()
-	g_log.V(3).Infof("get topics available in kafka: %s", base.JSONDebugDataString(listTopic))
+	fmt.Printf(fmt.Sprintf("get topics available in kafka: %s", base.JSONDebugDataString(listTopic)))
 
 	listTopicNotExisted := make([]string, 0)
 	for _, topicName := range c.config.ProducerTopics {
@@ -158,7 +130,7 @@ func (c *ClientKafka) CreateTopic() {
 	}
 
 	if len(listTopicNotExisted) == 0 {
-		g_log.V(3).Infof("ClientKafka::CreateTopic - All of %+v was existed", c.config.ProducerTopics)
+		fmt.Printf(fmt.Sprintf("ClientKafka::CreateTopic - All of %v was existed", c.config.ProducerTopics))
 
 		return
 	}
@@ -178,7 +150,7 @@ func (c *ClientKafka) CreateTopic() {
 
 	response, err := broker.CreateTopics(&request)
 	if err != nil {
-		g_log.V(1).WithError(err).Errorf("ClientKafka::CreateTopic - CreateTopics Error: %+v", err)
+		fmt.Printf(fmt.Sprintf("ClientKafka::CreateTopic - CreateTopics Error: %v", err))
 
 		return
 	}
@@ -186,7 +158,7 @@ func (c *ClientKafka) CreateTopic() {
 	t := response.TopicErrors
 	for key, val := range t {
 		if val.Err != sarama.ErrNoError {
-			g_log.V(1).WithError(err).Errorf("😡😡😡 ClientKafka::CreateTopic - Create topic key: %s - Error: %s at pod %s in host %s", key, val.Err.Error(), env.PodName, env.HostName)
+			fmt.Printf(fmt.Sprintf("😡😡😡 ClientKafka::CreateTopic - Create topic key: %s - Error: %s at pod %s in host %s", key, val.Err.Error(), env.Environment.Server.Host, env.Environment.Server.Host))
 		}
 	}
 }
@@ -198,7 +170,7 @@ func (c *ClientKafka) ProducerPushMessage(topic string, messageObj MessageKafka)
 		return 0, 0, fmt.Errorf("ClientKafka::ProducerPushMessage - Not found any producer")
 	}
 
-	g_log.V(4).Infof("ClientKafka::ProducerPushMessage - Push to topic: %s object data: %s", topic, base.JSONDebugDataString(messageObj))
+	fmt.Printf(fmt.Sprintf("ClientKafka::ProducerPushMessage - Push to topic: %s object data: %s", topic, base.JSONDebugDataString(messageObj)))
 
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
@@ -215,7 +187,7 @@ func (c *ClientKafka) ProducerPushMessageWithKey(topic, key string, messageObj M
 		return 0, 0, fmt.Errorf("ClientKafka::ProducerPushMessage - Not found any producer")
 	}
 
-	g_log.V(4).Infof("ClientKafka::ProducerPushMessage - Push to topic: %s, key: %s, object data: %s", topic, key, base.JSONDebugDataString(messageObj))
+	fmt.Printf(fmt.Sprintf("ClientKafka::ProducerPushMessage - Push to topic: %s, key: %s, object data: %s", topic, key, base.JSONDebugDataString(messageObj)))
 
 	msg := &sarama.ProducerMessage{
 		Topic: topic,

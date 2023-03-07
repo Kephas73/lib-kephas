@@ -24,4 +24,5 @@ const (
 	DeviceKind string = "DeviceKind"
 	DeviceIP   string = "DeviceIP"
 	UserID     string = "UserID"
+	ClientSite string = "ClientSite"
 )

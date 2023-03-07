@@ -27,11 +27,11 @@
 package kafka_client
 
 import (
+	"github.com/Kephas73/lib-kephas/base"
 	"math/rand"
 	"testing"
 
 	"github.com/spf13/viper"
-	"gitlab.gplay.vn/gtv-backend/fountain/baselib/base"
 )
 
 func init() {

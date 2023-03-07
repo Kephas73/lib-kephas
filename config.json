@@ -77,5 +77,15 @@
       "DBNum": 0,
       "MaxRetries": 3
     }
-  ]
+  ],
+  "Kafka": {
+    "Addrs": [
+      "18.142.112.173:9092"
+    ],
+    "NumPartitions": 3,
+    "ReplicationFactor": 1,
+    "ProducerTopics": [
+      "SaveMessageRedis"
+    ]
+  }
 }

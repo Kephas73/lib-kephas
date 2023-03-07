@@ -21,6 +21,22 @@ func GetContextDataString(ctx echo.Context, key string, defaultValues ...string)
 	return defaultValue
 }
 
+func GetContextDataInt(ctx echo.Context, key string, defaultValues ...int) int {
+	defaultValue := 0
+	if len(defaultValues) > 0 {
+		defaultValue = defaultValues[0]
+	}
+
+	userUUIDRaw := ctx.Get(key)
+	if userUUIDRaw != nil {
+		if res, ok := userUUIDRaw.(int); ok {
+			return res
+		}
+	}
+
+	return defaultValue
+}
+
 func SetContextDataString(ctx echo.Context, key string, value interface{}) {
 	ctx.Set(key, value)
 }

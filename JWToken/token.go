@@ -20,6 +20,7 @@ const (
 	KTokenSecureExpKey   string = "secure_exp"
 	KTokenDeviceKindKey  string = "device_kind"
 	KTokenDeviceIPKey    string = "device_ip"
+	KTokenClientSite     string = "client_site"
 )
 
 const (
@@ -32,6 +33,8 @@ const (
 type TokenDetails struct {
 	UserID             string        `json:"user_id,omitempty"`
 	DeviceKind         int           `json:"device_kind,omitempty"`
+	DeviceIP           string        `json:"device_ip,omitempty"`
+	ClientSite         int           `json:"client_site,omitempty"`
 	AccessUUID         uuid.UUID     `json:"access_uuid,omitempty"`
 	AccessToken        *jwt.Token    `json:"access_token,omitempty"`
 	RefreshUUID        uuid.UUID     `json:"refresh_uuid,omitempty"`
@@ -58,7 +61,7 @@ func Sign(token *TokenDetails, signer string) (string, string, error) {
 	return signedAt, signedRt, nil
 }
 
-func NewToken(accountID string, deviceKind int, deviceIP string, configs ...*JWTConfig) (*TokenDetails, error) {
+func NewToken(accountID string, deviceKind int, deviceIP string, clientSite int, configs ...*JWTConfig) (*TokenDetails, error) {
 	if conf == nil {
 		if len(configs) == 0 {
 			getJWTConfigFromEnv()
@@ -70,6 +73,8 @@ func NewToken(accountID string, deviceKind int, deviceIP string, configs ...*JWT
 	td := &TokenDetails{}
 	td.UserID = accountID
 	td.DeviceKind = deviceKind
+	td.DeviceIP = deviceIP
+	td.ClientSite = clientSite
 
 	td.AtExpires = time.Duration(conf.AccessTokenTTL) * time.Second
 	td.SecureExpire = time.Duration(conf.SecureTokenTTL) * time.Second
@@ -83,6 +88,7 @@ func NewToken(accountID string, deviceKind int, deviceIP string, configs ...*JWT
 	atClaims[KTokenExpKey] = time.Now().Add(td.AtExpires).Unix()
 	atClaims[KTokenDeviceKindKey] = deviceKind
 	atClaims[KTokenDeviceIPKey] = deviceIP
+	atClaims[KTokenClientSite] = clientSite
 	atClaims[KTokenSecureExpKey] = time.Now().Add(td.SecureExpire).Unix()
 	td.AccessToken = jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
@@ -94,6 +100,7 @@ func NewToken(accountID string, deviceKind int, deviceIP string, configs ...*JWT
 	rtClaims[KTokenExpKey] = time.Now().Add(td.RtExpires).Unix()
 	rtClaims[KTokenDeviceKindKey] = deviceKind
 	rtClaims[KTokenDeviceIPKey] = deviceIP
+	rtClaims[KTokenClientSite] = clientSite
 	td.RefreshToken = jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 
 	_, _, err := Sign(td, conf.SecretKey)
@@ -101,7 +108,7 @@ func NewToken(accountID string, deviceKind int, deviceIP string, configs ...*JWT
 	return td, err
 }
 
-func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (accessUUID string, accountID string, deviceKind int, deviceIP string, bearToken string, errError *error_code.ErrorCode) {
+func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (accessUUID string, accountID string, deviceKind int, deviceIP string, clientSite int, bearToken string, errError *error_code.ErrorCode) {
 	if conf == nil {
 		if len(configs) == 0 {
 			getJWTConfigFromEnv()
@@ -154,6 +161,15 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 			deviceIP = ip
 		}
 
+		if site, err := base.StringToInt64(fmt.Sprintf("%v", claims[KTokenClientSite])); err == nil {
+			clientSite = int(site)
+		}
+
+		if clientSite < 0 {
+			errError = error_code.NewError(error_code.ERROR_TOKEN_INVALID, fmt.Sprintf("no client site info: %s", accountID), base.GetFunc())
+			return
+		}
+
 		if shortLive {
 			shortLiveExp, ok := claims[KTokenSecureExpKey].(float64)
 			if !ok {
@@ -172,7 +188,7 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 	return
 }
 
-func ExtractRefreshToken(c echo.Context, configs ...*JWTConfig) (refreshUUID string, accountID string, errError *error_code.ErrorCode) {
+func ExtractRefreshToken(c echo.Context, configs ...*JWTConfig) (refreshUUID, accountID string, deviceKind, clientSite int, errError *error_code.ErrorCode) {
 	if conf == nil {
 		if len(configs) == 0 {
 			getJWTConfigFromEnv()
@@ -208,6 +224,24 @@ func ExtractRefreshToken(c echo.Context, configs ...*JWTConfig) (refreshUUID str
 		accountID, ok = claims[KTokenUserIDKey].(string)
 		if !ok {
 			errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, "invalid Bearer Token", base.GetFunc())
+			return
+		}
+
+		if dv, err := base.StringToInt64(fmt.Sprintf("%v", claims[KTokenDeviceKindKey])); err == nil {
+			deviceKind = int(dv)
+		}
+
+		if deviceKind < 0 {
+			errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, fmt.Sprintf("no device info: %s", accountID), base.GetFunc())
+			return
+		}
+
+		if site, err := base.StringToInt64(fmt.Sprintf("%v", claims[KTokenClientSite])); err == nil {
+			clientSite = int(site)
+		}
+
+		if clientSite < 0 {
+			errError = error_code.NewError(error_code.ERROR_REFRESH_TOKEN_INVALID, fmt.Sprintf("no client site info: %s", accountID), base.GetFunc())
 			return
 		}
 
