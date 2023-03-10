@@ -130,7 +130,7 @@ func (c *ClientKafka) CreateTopic() {
 	}
 
 	if len(listTopicNotExisted) == 0 {
-		fmt.Printf(fmt.Sprintf("ClientKafka::CreateTopic - All of %v was existed", c.config.ProducerTopics))
+		fmt.Println(fmt.Sprintf("ClientKafka::CreateTopic - All of %v was existed", c.config.ProducerTopics))
 
 		return
 	}

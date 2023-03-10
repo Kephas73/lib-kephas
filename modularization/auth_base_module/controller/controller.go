@@ -1,4 +1,4 @@
-package auth_base
+package controller
 
 import (
 	"context"
@@ -28,17 +28,11 @@ type AuthBaseCtrl struct {
 	CacheRepository *redis_client.RedisPool
 }
 
-var AuthBase *AuthBaseCtrl
-
 func NewAuthBaseCtrl(cache *redis_client.RedisPool, timeout time.Duration) *AuthBaseCtrl {
 	return &AuthBaseCtrl{
 		Timeout:         timeout,
 		CacheRepository: cache,
 	}
-}
-
-func Initialize(cache *redis_client.RedisPool, timeout time.Duration) {
-	AuthBase = NewAuthBaseCtrl(cache, timeout)
 }
 
 func (ctrl *AuthBaseCtrl) JWTGateway(next echo.HandlerFunc) echo.HandlerFunc {
