@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/Shopify/sarama v1.32.0
 	github.com/aws/aws-sdk-go v1.44.126
+	github.com/casbin/casbin/v2 v2.40.6
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/gabriel-vasile/mimetype v1.4.1

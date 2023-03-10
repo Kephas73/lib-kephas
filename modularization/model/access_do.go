@@ -4,8 +4,9 @@ import "time"
 
 type Policy struct {
 	PermissionID int        `json:"permission_id" db:"permission_id"`
-	Path         string     `json:"path" db:"path"`
 	Method       string     `json:"method" db:"method"`
+	Path         string     `json:"path" db:"path"`
+	Name         string     `json:"name" db:"name"`
 	CreatedAt    *time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    *time.Time `json:"updated_at" db:"updated_at"`
 }

@@ -60,9 +60,9 @@ var AccessBase *controller.AccessBaseController
 //COLLATE='utf8_unicode_ci'
 //ENGINE=InnoDB;
 //================================================================================================
-func Initialize(e *echo.Echo, cache *redis_client.RedisPool, sqlx *sqlx.DB, timeout time.Duration) {
+func Initialize(e *echo.Echo, cache *redis_client.RedisPool, sqlx *sqlx.DB, rbacModelPath string, timeout time.Duration) {
 
-	AccessBase = controller.NewAuthController(cache, sqlx, timeout)
+	AccessBase = controller.NewAccessBaseController(cache, sqlx, rbacModelPath, timeout)
 
 	initRouter(e)
 }
