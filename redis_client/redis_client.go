@@ -1,6 +1,7 @@
 package redis_client
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strings"
@@ -52,6 +53,10 @@ func NewRedisUniversalClient(conf *RedisConfig) *RedisPool {
 		}
 
 		myClient := redis.NewClient(myConfig)
+
+		if conf.ExpiredEvents {
+			myClient.ConfigSet(context.Background(), "notify-keyspace-events", "Ex")
+		}
 
 		myEnv := fmt.Sprintf("[%s]tcp@%s", conf.Name, strings.Join(conf.Hosts, ";"))
 
@@ -113,6 +118,10 @@ func NewRedisUniversalClient(conf *RedisConfig) *RedisPool {
 		}
 
 		myClient := redis.NewClusterClient(myConfig)
+
+		if conf.ExpiredEvents {
+			myClient.ConfigSet(context.Background(), "notify-keyspace-events", "Ex")
+		}
 
 		myEnv := fmt.Sprintf("[%s]tcp@%s", conf.Name, strings.Join(conf.Hosts, ";"))
 

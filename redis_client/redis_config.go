@@ -11,6 +11,11 @@ const (
 	DefaultTimeout = 30 * time.Second
 )
 
+type ConfigSet struct {
+	Key   string
+	Value string
+}
+
 // RedisConfig - Redis client config.
 type RedisConfig struct {
 	Name         string   `json:"name,omitempty"` // redis name
@@ -30,6 +35,8 @@ type RedisConfig struct {
 
 	MaxRetries int    `json:"max_retries,omitempty"` //
 	MasterName string `json:"master_name,omitempty"` //
+
+	ExpiredEvents bool `json:"expired_events,omitempty"`
 }
 
 // ToRedisCacheConfig func
