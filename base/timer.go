@@ -21,3 +21,7 @@ func TimeCurrent() string {
 func TimeNowUnix() int64 {
 	return time.Now().Unix()
 }
+
+func TimeNowUnixMs() int64 {
+	return time.Now().UnixNano() / 1000
+}
