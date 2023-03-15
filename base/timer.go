@@ -23,5 +23,5 @@ func TimeNowUnix() int64 {
 }
 
 func TimeNowUnixMs() int64 {
-	return time.Now().UnixNano() / 1000
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }
