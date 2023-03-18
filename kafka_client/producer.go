@@ -158,7 +158,7 @@ func (c *ClientKafka) CreateTopic() {
 	t := response.TopicErrors
 	for key, val := range t {
 		if val.Err != sarama.ErrNoError {
-			fmt.Printf(fmt.Sprintf("😡😡😡 ClientKafka::CreateTopic - Create topic key: %s - Error: %s at pod %s in host %s", key, val.Err.Error(), env.Environment.Server.Host, env.Environment.Server.Host))
+			fmt.Println(fmt.Sprintf("😡😡😡 ClientKafka::CreateTopic - Create topic key: %s - Error: %s at pod %s in host %s", key, val.Err.Error(), env.Environment.Server.Host, env.Environment.Server.Host))
 		}
 	}
 }
@@ -170,7 +170,7 @@ func (c *ClientKafka) ProducerPushMessage(topic string, messageObj MessageKafka)
 		return 0, 0, fmt.Errorf("ClientKafka::ProducerPushMessage - Not found any producer")
 	}
 
-	fmt.Printf(fmt.Sprintf("ClientKafka::ProducerPushMessage - Push to topic: %s object data: %s", topic, base.JSONDebugDataString(messageObj)))
+	fmt.Println(fmt.Sprintf("ClientKafka::ProducerPushMessage - Push to topic: %s object data: %s", topic, base.JSONDebugDataString(messageObj)))
 
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
@@ -187,7 +187,7 @@ func (c *ClientKafka) ProducerPushMessageWithKey(topic, key string, messageObj M
 		return 0, 0, fmt.Errorf("ClientKafka::ProducerPushMessage - Not found any producer")
 	}
 
-	fmt.Printf(fmt.Sprintf("ClientKafka::ProducerPushMessage - Push to topic: %s, key: %s, object data: %s", topic, key, base.JSONDebugDataString(messageObj)))
+	fmt.Println(fmt.Sprintf("ClientKafka::ProducerPushMessage - Push to topic: %s, key: %s, object data: %s", topic, key, base.JSONDebugDataString(messageObj)))
 
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
