@@ -17,6 +17,7 @@ require (
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/lib/pq v1.10.7
 	github.com/lithammer/shortuuid/v3 v3.0.7
+	github.com/pquerna/otp v1.4.0
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.13.0
