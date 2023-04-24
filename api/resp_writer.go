@@ -11,10 +11,10 @@ type ObjectExtend interface {
 }
 
 type Response struct {
-	Message    string                  `json:"Message,omitempty"`
-	Data       interface{}             `json:"Data,omitempty"`
-	DataExtend map[string]ObjectExtend `json:"DataExtend,omitempty"`
-	Status     int                     `json:"Status,omitempty"`
+	Message    string      `json:"Message,omitempty"`
+	Data       interface{} `json:"Data,omitempty"`
+	DataExtend interface{} `json:"DataExtend,omitempty"`
+	Status     int         `json:"Status,omitempty"`
 }
 
 func WriteSuccess(c echo.Context, v interface{}) error {
@@ -59,7 +59,7 @@ func WriterSuccessOther(c echo.Context, success *error_code.SuccessCode) error {
 	return c.JSON(int(success.Status), res)
 }
 
-func WriterSuccessOtherWithExtend(c echo.Context, success *error_code.SuccessCode, extend map[string]ObjectExtend) error {
+func WriterSuccessOtherWithExtend(c echo.Context, success *error_code.SuccessCode, extend interface{}) error {
 	res := Response{
 		Message:    "Success!!",
 		Data:       success,
