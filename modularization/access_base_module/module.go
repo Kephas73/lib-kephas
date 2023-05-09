@@ -3,6 +3,7 @@ package access_base_module
 import (
 	"github.com/Kephas73/lib-kephas/env"
 	"github.com/Kephas73/lib-kephas/modularization/access_base_module/controller"
+	auth_base "github.com/Kephas73/lib-kephas/modularization/auth_base_module"
 	"github.com/Kephas73/lib-kephas/redis_client"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -71,4 +72,12 @@ func initRouter(e *echo.Echo) {
 	gr := e.Group(path.Join(env.Environment.SettingAPI.Path, env.Environment.SettingAPI.Version))
 
 	gr.GET("/access-base/status", AccessBase.Status)
+	gr.GET("/access-base/role", AccessBase.ListRole, auth_base.AuthBase.JWTGateway)
+	gr.POST("/access-base/role", AccessBase.CreateRole, auth_base.AuthBase.JWTGateway)
+	gr.PUT("/access-base/role/:id", AccessBase.UpdateRole, auth_base.AuthBase.JWTGateway)
+	gr.DELETE("/access-base/role/:id", AccessBase.DeleteRole, auth_base.AuthBase.JWTGateway)
+
+	gr.GET("/access-base/permission", AccessBase.ListPermission, auth_base.AuthBase.JWTGateway)
+
+	gr.PUT("/access-base/change-permission-role/:id", AccessBase.ChangePermissionRole, auth_base.AuthBase.JWTGateway)
 }

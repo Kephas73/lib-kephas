@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/Kephas73/lib-kephas/base"
+	"github.com/Kephas73/lib-kephas/constant"
 	"github.com/Kephas73/lib-kephas/error_code"
 	"github.com/Kephas73/lib-kephas/logger"
 	"github.com/Kephas73/lib-kephas/modularization/access_base_module/repository"
@@ -12,6 +13,7 @@ import (
 	"github.com/Kephas73/lib-kephas/redis_client"
 	"github.com/casbin/casbin/v2"
 	"github.com/jmoiron/sqlx"
+	"strings"
 	"sync"
 	"time"
 )
@@ -21,6 +23,14 @@ type IAccessBaseService interface {
 	GetsPolicy(ctx context.Context) ([]*model.Policy, *error_code.ErrorCode)
 	GetsPermissionByRole(ctx context.Context, roleID int) ([]*model.PermissionRole, *error_code.ErrorCode)
 	GetRoleByUser(ctx context.Context, userUUID string) (*model.UserRole, *error_code.ErrorCode)
+
+	GetsRole(ctx context.Context, name string) ([]*model.Role, *error_code.ErrorCode)
+	CreateRole(ctx context.Context, role *model.Role) (*model.Role, *error_code.ErrorCode)
+	UpdateRole(ctx context.Context, role *model.Role) (*model.Role, *error_code.ErrorCode)
+	DeleteRole(ctx context.Context, role *model.Role) *error_code.ErrorCode
+
+	GetsPermission(ctx context.Context, name string) ([]*model.Permission, *error_code.ErrorCode)
+	UpdatePermissionRole(ctx context.Context, roleID int, permissionID []int) *error_code.ErrorCode
 }
 
 type AccessBaseService struct {
@@ -184,4 +194,149 @@ func (service *AccessBaseService) InitPolicy() {
 	}
 
 	go service.RunLoopLoadPolicy()
+}
+
+func (service *AccessBaseService) GetsRole(ctx context.Context, name string) ([]*model.Role, *error_code.ErrorCode) {
+	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
+	defer cancel()
+
+	role, err := service.AccessBaseRepository.SelectsRole(ctx, name)
+	if err != nil {
+		logger.Error("AccessBaseService::GetsRole: -Error: %v", err)
+		errC := error_code.NewError(error_code.ERROR_RETRIEVE_DATA, err.Error(), base.GetFunc())
+		return nil, errC
+	}
+
+	return role, nil
+}
+
+func (service *AccessBaseService) CreateRole(ctx context.Context, role *model.Role) (*model.Role, *error_code.ErrorCode) {
+	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
+	defer cancel()
+
+	list, errC := service.GetsRole(ctx, constant.StrEmpty)
+	if errC != nil {
+		return nil, errC
+	}
+
+	for _, v := range list {
+		if strings.ToLower(v.Name) == role.Name {
+			errC = error_code.NewError(error_code.ERROR_DUPLICATE_DATA, "name already exists", base.GetFunc())
+			return nil, errC
+		}
+	}
+
+	// TODO: có check gì không
+	err := service.AccessBaseRepository.InsertOrUpdateRole(ctx, role)
+	if err != nil {
+		logger.Error("AccessBaseService::CreateRole: -Error: %v", err)
+		errC = error_code.NewError(error_code.ERROR_SAVE_DATA, err.Error(), base.GetFunc())
+		return nil, errC
+	}
+
+	return role, nil
+
+}
+
+func (service *AccessBaseService) UpdateRole(ctx context.Context, role *model.Role) (*model.Role, *error_code.ErrorCode) {
+	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
+	defer cancel()
+
+	exist := 0
+	// TODO: có check gì không
+	list, errC := service.GetsRole(ctx, constant.StrEmpty)
+	if errC != nil {
+		return nil, errC
+	}
+
+	for _, v := range list {
+		if strings.ToLower(v.Name) == role.Name && v.RoleID != role.RoleID {
+			errC = error_code.NewError(error_code.ERROR_DUPLICATE_DATA, "name already exists", base.GetFunc())
+			return nil, errC
+		}
+
+		if v.RoleID == role.RoleID {
+			exist++
+			break
+		}
+	}
+
+	if exist == constant.ValueEmpty {
+		errC = error_code.NewError(error_code.ERROR_NOT_FOUND, "role notfound", base.GetFunc())
+		return nil, errC
+	}
+
+	err := service.AccessBaseRepository.InsertOrUpdateRole(ctx, role)
+	if err != nil {
+		logger.Error("AccessBaseService::UpdateRole: -Error: %v", err)
+		errC = error_code.NewError(error_code.ERROR_SAVE_DATA, err.Error(), base.GetFunc())
+		return nil, errC
+	}
+
+	return role, nil
+}
+
+func (service *AccessBaseService) DeleteRole(ctx context.Context, role *model.Role) *error_code.ErrorCode {
+	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
+	defer cancel()
+
+	err := service.AccessBaseRepository.DeleteRole(ctx, role)
+	if err != nil {
+		logger.Error("AccessBaseService::DeleteRole: -Error: %v", err)
+		errC := error_code.NewError(error_code.ERROR_SAVE_DATA, err.Error(), base.GetFunc())
+		return errC
+	}
+
+	go service.CacheDelPermissionRole(role.RoleID)
+
+	return nil
+}
+
+func (service *AccessBaseService) GetsPermission(ctx context.Context, name string) ([]*model.Permission, *error_code.ErrorCode) {
+	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
+	defer cancel()
+
+	permission, err := service.AccessBaseRepository.SelectsPermission(ctx, name)
+	if err != nil {
+		logger.Error("AccessBaseService::GetsPermission: -Error: %v", err)
+		errC := error_code.NewError(error_code.ERROR_RETRIEVE_DATA, err.Error(), base.GetFunc())
+		return nil, errC
+	}
+
+	return permission, nil
+}
+
+func (service *AccessBaseService) UpdatePermissionRole(ctx context.Context, roleID int, permissionID []int) *error_code.ErrorCode {
+	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
+	defer cancel()
+
+	// TODO: có check gì không, nên check theo từng role thôi là đẹp.
+	exist := 0
+	list, errC := service.GetsRole(ctx, constant.StrEmpty)
+	if errC != nil {
+		return errC
+	}
+
+	for _, v := range list {
+		if v.RoleID == roleID {
+			exist++
+			break
+		}
+	}
+
+	if exist == constant.ValueEmpty {
+		errC = error_code.NewError(error_code.ERROR_NOT_FOUND, "role notfound", base.GetFunc())
+		return errC
+	}
+
+	err := service.AccessBaseRepository.UpdatePermissionRole(ctx, roleID, permissionID)
+	if err != nil {
+		logger.Error("AccessBaseService::GetsPermission: -Error: %v", err)
+		errC = error_code.NewError(error_code.ERROR_SAVE_DATA, err.Error(), base.GetFunc())
+		return errC
+	}
+
+	go service.CacheDelPermissionRole(roleID)
+
+	return nil
 }
