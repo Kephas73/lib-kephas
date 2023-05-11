@@ -10,71 +10,71 @@ import (
 )
 
 const (
-	KeyPermissionRole string = "rbac:role:%d:permission"
-	KeyRoleUser       string = "rbac:user:%s:role"
+	KeyRole     string = "rbac:role:%s"
+	KeyRoleUser string = "rbac:user:%s:role"
 )
 
-func (service *AccessBaseService) CacheSetPermissionRole(permissionRole []*model.PermissionRole, roleID int) error {
+func (service *AccessBaseService) CacheSetRole(role *model.Role) error {
 	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
 	defer cancel()
 
 	conn := service.Cache.Get()
 	if conn == nil {
 		err := fmt.Errorf("can not get connection")
-		logger.Error("AccessBaseService:CacheSetPermissionRole: -Get connection error: %v", err)
+		logger.Error("AccessBaseService:CacheSetRole: -Get connection error: %v", err)
 
 		return err
 	}
 
-	b, err := json.Marshal(permissionRole)
+	b, err := json.Marshal(role)
 	if err != nil {
-		logger.Error("AccessBaseService:CacheSetPermissionRole: -Marshal error: %v", err)
+		logger.Error("AccessBaseService:CacheSetRole: -Marshal error: %v", err)
 		return err
 	}
 
-	return conn.Set(ctx, fmt.Sprintf(KeyPermissionRole, roleID), string(b), time.Hour*24).Err()
+	return conn.Set(ctx, fmt.Sprintf(KeyRole, role.RoleID), string(b), time.Hour*24).Err()
 }
 
-func (service *AccessBaseService) CacheGetPermissionRole(roleID int) ([]*model.PermissionRole, error) {
+func (service *AccessBaseService) CacheGetRole(roleID string) (*model.Role, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
 	defer cancel()
 
 	conn := service.Cache.Get()
 	if conn == nil {
 		err := fmt.Errorf("can not get connection")
-		logger.Error("AccessBaseService:CacheGetPermissionRole: -Get connection error: %v", err)
+		logger.Error("AccessBaseService:CacheGetRole: -Get connection error: %v", err)
 
 		return nil, err
 	}
 
-	rs, err := conn.Get(ctx, fmt.Sprintf(KeyPermissionRole, roleID)).Result()
+	rs, err := conn.Get(ctx, fmt.Sprintf(KeyRole, roleID)).Result()
 	if err != nil {
-		logger.Error("AccessBaseService:CacheGetPermissionRole: -Get redis error: %v", err)
+		logger.Error("AccessBaseService:CacheGetRole: -Get redis error: %v", err)
 		return nil, err
 	}
 
-	permissionRole := make([]*model.PermissionRole, 0)
-	if err = json.Unmarshal([]byte(rs), &permissionRole); err != nil {
-		logger.Error("AccessBaseService:CacheGetPermissionRole: -Get redis error: %v", err)
+	role := model.Role{}
+	if err = json.Unmarshal([]byte(rs), &role); err != nil {
+		logger.Error("AccessBaseService:CacheGetRole: -Get redis error: %v", err)
 		return nil, err
 	}
 
-	return permissionRole, nil
+	return &role, nil
 }
 
-func (service *AccessBaseService) CacheDelPermissionRole(roleID int) error {
+func (service *AccessBaseService) CacheDelRole(roleID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), service.Timout)
 	defer cancel()
 
 	conn := service.Cache.Get()
 	if conn == nil {
 		err := fmt.Errorf("can not get connection")
-		logger.Error("AccessBaseService:CacheDelPermissionRole: -Get connection error: %v", err)
+		logger.Error("AccessBaseService:CacheDelRole: -Get connection error: %v", err)
 
 		return err
 	}
 
-	return conn.Del(ctx, fmt.Sprintf(KeyPermissionRole, roleID)).Err()
+	return conn.Del(ctx, fmt.Sprintf(KeyRole, roleID)).Err()
 }
 
 //============================================================================================

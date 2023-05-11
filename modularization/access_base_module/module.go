@@ -72,12 +72,17 @@ func initRouter(e *echo.Echo) {
 	gr := e.Group(path.Join(env.Environment.SettingAPI.Path, env.Environment.SettingAPI.Version))
 
 	gr.GET("/access-base/status", AccessBase.Status)
+
+	// get role and permission
+	gr.GET("/access-base/user/role", AccessBase.GetUserRole, auth_base.AuthBase.JWTGateway)
+
+	// chìa api get list user và role
+	// chìa api thay đổi quyền
+
 	gr.GET("/access-base/role", AccessBase.ListRole, auth_base.AuthBase.JWTGateway)
 	gr.POST("/access-base/role", AccessBase.CreateRole, auth_base.AuthBase.JWTGateway)
 	gr.PUT("/access-base/role/:id", AccessBase.UpdateRole, auth_base.AuthBase.JWTGateway)
 	gr.DELETE("/access-base/role/:id", AccessBase.DeleteRole, auth_base.AuthBase.JWTGateway)
 
 	gr.GET("/access-base/permission", AccessBase.ListPermission, auth_base.AuthBase.JWTGateway)
-
-	gr.PUT("/access-base/change-permission-role/:id", AccessBase.ChangePermissionRole, auth_base.AuthBase.JWTGateway)
 }
