@@ -96,7 +96,7 @@ func (repository *AccessBaseRepository) SelectUserRoleByUserUUID(ctx context.Con
 }
 
 func (repository *AccessBaseRepository) SelectsUserRoleByUserUUID(ctx context.Context, userUUID ...string) ([]*model.UserRole, error) {
-	var query = `SELECT user_uuid, role_id, created_at, updated_at FROM rbac_user WHERE user_uuid (?)`
+	var query = `SELECT user_uuid, role_id, created_at, updated_at FROM rbac_user WHERE user_uuid IN (?)`
 
 	q, a, err := sqlx.In(query, userUUID)
 	if err != nil {
