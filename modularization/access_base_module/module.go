@@ -79,10 +79,10 @@ func initRouter(e *echo.Echo) {
 	// chìa api get list user và role
 	// chìa api thay đổi quyền
 
-	gr.GET("/access-base/role", AccessBase.ListRole, auth_base.AuthBase.JWTGateway)
-	gr.POST("/access-base/role", AccessBase.CreateRole, auth_base.AuthBase.JWTGateway)
-	gr.PUT("/access-base/role/:id", AccessBase.UpdateRole, auth_base.AuthBase.JWTGateway)
-	gr.DELETE("/access-base/role/:id", AccessBase.DeleteRole, auth_base.AuthBase.JWTGateway)
+	gr.GET("/access-base/role", AccessBase.ListRole, auth_base.AuthBase.JWTGateway, AccessBase.AccessGateway)
+	gr.POST("/access-base/role", AccessBase.CreateRole, auth_base.AuthBase.JWTGateway, AccessBase.AccessGateway)
+	gr.PUT("/access-base/role/:id", AccessBase.UpdateRole, auth_base.AuthBase.JWTGateway, AccessBase.AccessGateway)
+	gr.DELETE("/access-base/role/:id", AccessBase.DeleteRole, auth_base.AuthBase.JWTGateway, AccessBase.AccessGateway)
 
-	gr.GET("/access-base/permission", AccessBase.ListPermission, auth_base.AuthBase.JWTGateway)
+	gr.GET("/access-base/permission", AccessBase.ListPermission, auth_base.AuthBase.JWTGateway, AccessBase.AccessGateway)
 }
