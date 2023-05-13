@@ -7,7 +7,7 @@ import (
 )
 
 type RoleReq struct {
-	RoleID        int    `json:"role_id" db:"role_id"`
+	RoleID        string `json:"role_id" db:"role_id"`
 	Name          string `json:"name" db:"name"`
 	PermissionIDs []int  `json:"permission_ids" db:"permission_ids"`
 	TeamName      string `json:"team_name" db:"team_name"`
