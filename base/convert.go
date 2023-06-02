@@ -38,6 +38,11 @@ func StringToBool(s string) (bool, error) {
 	return strconv.ParseBool(s)
 }
 
+func StringToFloat32(s string) (float32, error) {
+	i, err := strconv.Atoi(s)
+	return float32(i), err
+}
+
 // Int64ToString func;
 func Int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)

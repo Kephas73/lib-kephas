@@ -46,6 +46,16 @@ func CheckElementExistInArrayInt64(array []int64, element int64) bool {
 	return false
 }
 
+func CheckElementExistFloat32Array(array []float32, element float32) bool {
+	for _, e := range array {
+		if e == element {
+			return true
+		}
+	}
+
+	return false
+}
+
 // UniqueSliceInt func;
 func UniqueSliceInt(intSlice []int) []int {
 	keys := make(map[int]bool)
