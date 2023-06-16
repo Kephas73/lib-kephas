@@ -3,11 +3,13 @@ module github.com/Kephas73/lib-kephas
 go 1.16
 
 require (
+	github.com/Kephas73/go-lib v1.0.17
 	github.com/Shopify/sarama v1.32.0
 	github.com/aws/aws-sdk-go v1.44.126
 	github.com/casbin/casbin/v2 v2.40.6
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eclipse/paho.mqtt.golang v1.4.2
+	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
@@ -17,6 +19,7 @@ require (
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/lib/pq v1.10.7
 	github.com/lithammer/shortuuid/v3 v3.0.7
+	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/pquerna/otp v1.4.0
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.9.0
