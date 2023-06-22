@@ -8,7 +8,6 @@ import (
 	"github.com/Kephas73/lib-kephas/document"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"strings"
-	"time"
 )
 
 func GetIndexES(hasPrefix string) string {
@@ -17,9 +16,7 @@ func GetIndexES(hasPrefix string) string {
 	return strings.ToLower(fmt.Sprintf("%s-%s.%s", esConf.Name, esConf.Environment, hasPrefix))
 }
 
-func (client *ElasticClient) InsertDocument(hasPrefix string, document document.Document) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+func (client *ElasticClient) InsertDocument(ctx context.Context, hasPrefix string, document document.Document) error {
 
 	req := esapi.IndexRequest{
 		Index:      GetIndexES(hasPrefix),
