@@ -35,7 +35,7 @@ type DataBase interface {
     FromJSON(data []byte) error
     ToJSON() string
     SetEventName(eventName string) DataBase
-    SeDataJSON(dataJSON string) DataBase
+    SeDataJSON(dataJSON interface{}) DataBase
     SetDescription(description string) DataBase
 }
 
@@ -62,7 +62,7 @@ func (obj *DefaultData) SetEventName(eventName string) DataBase {
     return obj
 }
 
-func (obj *DefaultData) SeDataJSON(dataJSON string) DataBase {
+func (obj *DefaultData)  SeDataJSON(dataJSON interface{}) DataBase {
     obj.Data = dataJSON
 
     return obj
