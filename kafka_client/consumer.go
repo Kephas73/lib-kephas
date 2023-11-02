@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 )
 
 // ConsumerProcessInstance func;
@@ -145,7 +145,7 @@ func (consumer *consumerInstance) ConsumeClaim(session sarama.ConsumerGroupSessi
 	// NOTE:
 	// Do not move the code below to a goroutine.
 	// The `ConsumeClaim` itself is called within a goroutine, see:
-	// https://github.com/Shopify/sarama/blob/master/consumer_group.go#L27-L29
+	// https://github.com/IBM/sarama/blob/master/consumer_group.go#L27-L29
 
 	for message := range claim.Messages() {
 		msgObj := MessageKafka{}

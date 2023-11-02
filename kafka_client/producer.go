@@ -6,7 +6,7 @@ import (
 	"github.com/Kephas73/lib-kephas/env"
 	"time"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 )
 
 // ClientKafka type;
