@@ -18,7 +18,7 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/jszwec/csvutil v1.8.0
-	github.com/labstack/echo/v4 v4.11.2
+	github.com/labstack/echo/v4 v4.9.1
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/shortuuid/v3 v3.0.7
 	github.com/opensearch-project/opensearch-go v1.1.0
