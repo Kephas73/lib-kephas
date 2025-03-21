@@ -170,6 +170,17 @@ func ExtractToken(c echo.Context, shortLive bool, configs ...*JWTConfig) (access
 			return
 		}
 
+		expired, ok := claims[KTokenExpKey].(float64)
+		if !ok {
+			errError = error_code.NewError(error_code.ERROR_TOKEN_INVALID, "invalid Bearer Token - not found exp", base.GetFunc())
+			return
+		}
+
+		if float64(time.Now().Unix()) > expired {
+			errError = error_code.NewError(error_code.ERROR_NEED_NEW_TOKEN, "invalid Bearer Token - token is expired", base.GetFunc())
+			return
+		}
+
 		if shortLive {
 			shortLiveExp, ok := claims[KTokenSecureExpKey].(float64)
 			if !ok {
