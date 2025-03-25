@@ -1,6 +1,10 @@
 {
   "Debug": true,
   "Logger": {
+    "MaxSize": 10,
+    "MaxBackups": 10,
+    "MaxAge": 10,
+    "Compress": false,
     "Path": "../var/log",
     "Prefix": "broker_dev",
     "SentryDns": "",
